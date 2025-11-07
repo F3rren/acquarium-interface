@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:acquariumfe/widgets/components/thermometer.dart';
-import 'package:acquariumfe/widgets/components/ph.dart';
-import 'package:acquariumfe/widgets/components/salinity.dart';
-import 'package:acquariumfe/widgets/components/orp.dart';
-import 'package:acquariumfe/widgets/components/manual_parameters.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class HealthDashboard extends StatelessWidget {
@@ -11,26 +6,74 @@ class HealthDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const currentTemperature = 25.5;
+    const statusMessage = "ALL GOOD";
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Hero Card - Check Status
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF4a4a4a), Color(0xFF3a3a3a)]),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Check Status',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  statusMessage,
+                  style: TextStyle(color: Colors.white, fontSize: 48, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Aggiornato 5 minuti fa',
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Temperature Bar
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF3a3a3a),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white12),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.thermostat, color: Colors.white70, size: 20),
+                const SizedBox(width: 8),
+                const Text('Temperature', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                const Spacer(),
+                Text(
+                  '${currentTemperature.toStringAsFixed(1)}°C',
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           _buildHealthScore(),
           const SizedBox(height: 20),
           _buildQuickStats(),
-          const SizedBox(height: 24),
-          const Text('Parametri in Tempo Reale', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          const Thermometer(currentTemperature: 25.3, targetTemperature: 25.0),
-          const SizedBox(height: 16),
-          const PhMeter(currentPh: 8.2, targetPh: 8.2),
-          const SizedBox(height: 16),
-          const SalinityMeter(currentSalinity: 1.024, targetSalinity: 1.024),
-          const SizedBox(height: 16),
-          const OrpMeter(currentOrp: 350, targetOrp: 360),
-          const SizedBox(height: 24),
-          const ManualParametersWidget(),
           const SizedBox(height: 24),
           _buildTrendCharts(),
           const SizedBox(height: 24),

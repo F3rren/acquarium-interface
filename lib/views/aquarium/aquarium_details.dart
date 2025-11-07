@@ -13,37 +13,19 @@ class AquariumDetails extends StatefulWidget {
 
 class _AquariumDetailsState extends State<AquariumDetails> {
   int _selectedBottomIndex = 0;
-  final double currentTemperature = 25.5;
-  final String statusMessage = "ALL GOOD";
 
-  void _navigateToPage(int index) {
-    if (index == _selectedBottomIndex) return;
+  // Lista delle pagine da mostrare
+  final List<Widget> _pages = const [
+    DashboardPage(),
+    ParametersPage(),
+    ChartsPage(),
+    ProfilePage(),
+  ];
 
-    setState(() => _selectedBottomIndex = index);
-
-    switch (index) {
-      case 0:
-        // Già sulla home, non fare nulla
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ParametersPage()),
-        ).then((_) => setState(() => _selectedBottomIndex = 0));
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChartsPage()),
-        ).then((_) => setState(() => _selectedBottomIndex = 0));
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
-        ).then((_) => setState(() => _selectedBottomIndex = 0));
-        break;
-    }
+  void _onTabTapped(int index) {
+    setState(() {
+      _selectedBottomIndex = index;
+    });
   }
 
   @override
@@ -65,41 +47,12 @@ class _AquariumDetailsState extends State<AquariumDetails> {
                 ],
               ),
             ),
-            Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF4a4a4a), Color(0xFF3a3a3a)]), borderRadius: BorderRadius.circular(20)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(12)),
-                    child: const Text('Check Status', style: TextStyle(color: Colors.white, fontSize: 12)),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(statusMessage, style: const TextStyle(color: Colors.white, fontSize: 48, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  const Text('Aggiornato 5 minuti fa', style: TextStyle(color: Colors.white70, fontSize: 11)),
-                ],
+            Expanded(
+              child: IndexedStack(
+                index: _selectedBottomIndex,
+                children: _pages,
               ),
             ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFF3a3a3a), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
-              child: Row(
-                children: [
-                  const Icon(Icons.thermostat, color: Colors.white70, size: 20),
-                  const SizedBox(width: 8),
-                  const Text('Temperature', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                  const Spacer(),
-                  Text('${currentTemperature.toStringAsFixed(1)}°C', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(child: const DashboardPage()),
           ],
         ),
       ),
@@ -126,7 +79,7 @@ class _AquariumDetailsState extends State<AquariumDetails> {
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _selectedBottomIndex == index;
     return GestureDetector(
-      onTap: () => _navigateToPage(index),
+      onTap: () => _onTabTapped(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(color: isSelected ? const Color(0xFF60a5fa).withValues(alpha: 0.2) : Colors.transparent, borderRadius: BorderRadius.circular(12)),

@@ -50,31 +50,22 @@ class _ParametersChartsState extends State<ParametersCharts> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF2d2d2d),
-      appBar: AppBar(
-        title: const Text('Andamento Parametri', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-        backgroundColor: const Color(0xFF3a3a3a),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 20),
-            _buildPeriodSelector(),
-            const SizedBox(height: 20),
-            _buildMainChart(),
-            const SizedBox(height: 20),
-            _buildStatistics(),
-            const SizedBox(height: 20),
-            _buildParameterGrid(),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          _buildHeader(),
+          const SizedBox(height: 20),
+          _buildPeriodSelector(),
+          const SizedBox(height: 20),
+          _buildMainChart(),
+          const SizedBox(height: 20),
+          _buildStatistics(),
+          const SizedBox(height: 20),
+          _buildParameterGrid(),
+        ],
       ),
     );
   }
