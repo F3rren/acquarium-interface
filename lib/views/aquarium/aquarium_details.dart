@@ -11,8 +11,10 @@ class AquariumDetails extends StatefulWidget {
   State<StatefulWidget> createState() => _AquariumDetailsState();
 }
 
-class _AquariumDetailsState extends State<AquariumDetails> {
+class _AquariumDetailsState extends State<AquariumDetails> with SingleTickerProviderStateMixin {
   int _selectedBottomIndex = 0;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   // Lista delle pagine da mostrare
   final List<Widget> _pages = const [
@@ -22,9 +24,33 @@ class _AquariumDetailsState extends State<AquariumDetails> {
     ProfilePage(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   void _onTabTapped(int index) {
-    setState(() {
-      _selectedBottomIndex = index;
+    if (index == _selectedBottomIndex) return;
+    
+    _animationController.reverse().then((_) {
+      setState(() {
+        _selectedBottomIndex = index;
+      });
+      _animationController.forward();
     });
   }
 
@@ -41,16 +67,19 @@ class _AquariumDetailsState extends State<AquariumDetails> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.white), onPressed: () {}),
-                  const Text('La Mia Vasca', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
                   IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+                  const Text('La Mia Vasca', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
+                  IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.white), onPressed: () {}),
                 ],
               ),
             ),
             Expanded(
-              child: IndexedStack(
-                index: _selectedBottomIndex,
-                children: _pages,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: IndexedStack(
+                  index: _selectedBottomIndex,
+                  children: _pages,
+                ),
               ),
             ),
           ],
@@ -80,15 +109,36 @@ class _AquariumDetailsState extends State<AquariumDetails> {
     final isSelected = _selectedBottomIndex == index;
     return GestureDetector(
       onTap: () => _onTabTapped(index),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(color: isSelected ? const Color(0xFF60a5fa).withValues(alpha: 0.2) : Colors.transparent, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF60a5fa).withValues(alpha: 0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? const Color(0xFF60a5fa) : Colors.white60, size: 24),
+            AnimatedScale(
+              duration: const Duration(milliseconds: 200),
+              scale: isSelected ? 1.1 : 1.0,
+              child: Icon(
+                icon,
+                color: isSelected ? const Color(0xFF60a5fa) : Colors.white60,
+                size: 24,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: isSelected ? const Color(0xFF60a5fa) : Colors.white60, fontSize: 10, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal)),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF60a5fa) : Colors.white60,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+              child: Text(label),
+            ),
           ],
         ),
       ),

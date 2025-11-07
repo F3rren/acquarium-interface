@@ -7,11 +7,49 @@ class DeleteAquarium extends StatefulWidget {
   State<DeleteAquarium> createState() => _DeleteAquariumState();
 }
 
-class _DeleteAquariumState extends State<DeleteAquarium> {
+class _DeleteAquariumState extends State<DeleteAquarium> with SingleTickerProviderStateMixin {
   final List<Map<String, dynamic>> _aquariums = [
     {'id': 1, 'name': 'La Mia Vasca', 'volume': 200, 'type': 'Marino'},
     {'id': 2, 'name': 'Acquario Tropicale', 'volume': 150, 'type': 'Dolce'},
   ];
+  
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ),
+    );
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+    
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   void _deleteAquarium(Map<String, dynamic> aquarium) {
     showDialog(
@@ -138,8 +176,12 @@ class _DeleteAquariumState extends State<DeleteAquarium> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: _aquariums.isEmpty
-          ? Center(
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: _aquariums.isEmpty
+              ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -203,6 +245,8 @@ class _DeleteAquariumState extends State<DeleteAquarium> {
                 ..._aquariums.map((aquarium) => _buildAquariumCard(aquarium)),
               ],
             ),
+        ),
+      ),
     );
   }
 

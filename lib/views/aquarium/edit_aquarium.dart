@@ -7,7 +7,7 @@ class EditAquarium extends StatefulWidget {
   State<EditAquarium> createState() => _EditAquariumState();
 }
 
-class _EditAquariumState extends State<EditAquarium> {
+class _EditAquariumState extends State<EditAquarium> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _volumeController = TextEditingController();
@@ -20,9 +20,42 @@ class _EditAquariumState extends State<EditAquarium> {
   
   Map<String, dynamic>? _selectedAquarium;
   bool _isEditing = false;
+  
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ),
+    );
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+    
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _nameController.dispose();
     _volumeController.dispose();
     super.dispose();
@@ -36,6 +69,8 @@ class _EditAquariumState extends State<EditAquarium> {
       _volumeController.text = aquarium['volume'].toString();
       _selectedType = aquarium['type'];
     });
+    _animationController.reset();
+    _animationController.forward();
   }
 
   void _saveChanges() {
@@ -74,7 +109,13 @@ class _EditAquariumState extends State<EditAquarium> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: _isEditing ? _buildEditForm() : _buildAquariumList(),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: _isEditing ? _buildEditForm() : _buildAquariumList(),
+        ),
+      ),
     );
   }
 

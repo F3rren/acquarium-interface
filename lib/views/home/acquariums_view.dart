@@ -1,15 +1,64 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:acquariumfe/widgets/animated_value.dart';
 
-class AquariumView extends StatelessWidget {
+class AquariumView extends StatefulWidget {
   const AquariumView({super.key});
+
+  @override
+  State<AquariumView> createState() => _AquariumViewState();
+}
+
+class _AquariumViewState extends State<AquariumView> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
       children: [
-        _buildAquariumCard(context, "La Mia Vasca", "ALL GOOD", 25.5, true),
+        FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: _buildAquariumCard(context, "La Mia Vasca", "ALL GOOD", 25.5, true),
+          ),
+        ),
       ],
     );
   }
@@ -19,7 +68,8 @@ class AquariumView extends StatelessWidget {
       onTap: () => Navigator.pushNamed(context, "/details"),
       child: Hero(
         tag: "aquarium_card",
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             gradient: LinearGradient(

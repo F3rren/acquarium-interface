@@ -1,8 +1,33 @@
 import 'package:acquariumfe/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 
-class Navbar extends StatelessWidget implements PreferredSizeWidget {
+class Navbar extends StatefulWidget implements PreferredSizeWidget {
   const Navbar({super.key});
+
+  @override
+  State<Navbar> createState() => _NavbarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _NavbarState extends State<Navbar> with SingleTickerProviderStateMixin {
+  late AnimationController _iconController;
+
+  @override
+  void initState() {
+    super.initState();
+    _iconController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _iconController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +54,20 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () {},
         ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.add_circle_outline, size: 24),
+          icon: RotationTransition(
+            turns: Tween<double>(begin: 0.0, end: 0.125).animate(_iconController),
+            child: const Icon(Icons.add_circle_outline, size: 24),
+          ),
           tooltip: 'Gestisci Acquari',
           color: const Color(0xFF3a3a3a),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(color: Colors.white.withOpacity(0.1)),
           ),
+          onOpened: () => _iconController.forward(),
+          onCanceled: () => _iconController.reverse(),
           onSelected: (value) {
+            _iconController.reverse();
             switch (value) {
               case 'add':
                 Navigator.pushNamed(context, RouteNames.addAquarium);
@@ -116,7 +147,4 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
       ],
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
