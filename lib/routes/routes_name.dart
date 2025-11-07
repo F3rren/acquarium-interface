@@ -12,5 +12,7 @@ class RouteNames {
   static const deleteAquarium = '/delete_aquarium';
   // Rotta per impostazioni
   static const settings = '/settings';
+  // Rotta per grafici parametri
+  static const parametersCharts = '/parameters_charts';
 
 }

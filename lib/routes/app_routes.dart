@@ -1,9 +1,10 @@
 import 'package:acquariumfe/main.dart';
 import 'package:acquariumfe/routes/routes_name.dart';
-import 'package:acquariumfe/view/add_aquarium.dart';
-import 'package:acquariumfe/view/aquarium_details.dart';
-import 'package:acquariumfe/view/delete_aquarium.dart';
-import 'package:acquariumfe/view/edit_aquarium.dart';
+import 'package:acquariumfe/views/aquarium/add_aquarium.dart';
+import 'package:acquariumfe/views/aquarium/aquarium_details.dart';
+import 'package:acquariumfe/views/aquarium/delete_aquarium.dart';
+import 'package:acquariumfe/views/aquarium/edit_aquarium.dart';
+import 'package:acquariumfe/views/parameters/parameters_charts.dart';
 import 'package:flutter/material.dart';
 
 class AppRouter {
@@ -20,6 +21,9 @@ class AppRouter {
       
       case RouteNames.deleteAquarium:
         return MaterialPageRoute(builder: (_) => const DeleteAquarium());
+      
+      case RouteNames.parametersCharts:
+        return MaterialPageRoute(builder: (_) => const ParametersCharts());
 
       default:
         return MaterialPageRoute(builder: (_) => const HomePage());

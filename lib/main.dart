@@ -1,6 +1,6 @@
 import 'package:acquariumfe/routes/app_routes.dart';
-import 'package:acquariumfe/view/navbar/navbar.dart';
-import 'package:acquariumfe/view/acquariums_view.dart';
+import 'package:acquariumfe/views/home/acquariums_view.dart';
+import 'package:acquariumfe/views/shared/navbar/navbar.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,8 +17,11 @@ class MyApp extends StatelessWidget {
       title: 'Aquarium HomePage',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 58, 116, 183),
+          seedColor: const Color(0xFF60a5fa),
+          brightness: Brightness.dark,
         ),
+        scaffoldBackgroundColor: const Color(0xFF1a1a1a),
+        cardColor: const Color(0xFF2a2a2a),
       ),
       home: const HomePage(),
       onGenerateRoute: AppRouter.generateRoute,
@@ -34,15 +37,21 @@ class HomePage extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF3ac3cb), Color(0xFFf85187)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0f0f0f),
+            Color(0xFF1a1a1a),
+            Color(0xFF2d2d2d),
+            Color(0xFF1e1e1e),
+          ],
+          stops: [0.0, 0.3, 0.7, 1.0],
         ),
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: const Navbar(),
-        body: const AcquariumView(),
+        appBar: Navbar(),
+        body: AquariumView(),
       ),
     );
   }

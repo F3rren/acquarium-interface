@@ -1,0 +1,176 @@
+﻿import 'package:flutter/material.dart';
+import 'package:acquariumfe/widgets/animated_value.dart';
+
+class AquariumView extends StatelessWidget {
+  const AquariumView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
+      children: [
+        _buildAquariumCard(context, "La Mia Vasca", "ALL GOOD", 25.5, true),
+      ],
+    );
+  }
+
+  Widget _buildAquariumCard(BuildContext context, String name, String status, double temp, bool isGood) {
+    return BounceButton(
+      onTap: () => Navigator.pushNamed(context, "/details"),
+      child: Hero(
+        tag: "aquarium_card",
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF4a4a4a),
+                const Color(0xFF3a3a3a),
+                const Color(0xFF2d2d2d),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFF5a5a5a), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20, offset: const Offset(0, 8)),
+              BoxShadow(
+                color: isGood ? const Color(0xFF60a5fa).withOpacity(0.15) : const Color(0xFFef4444).withOpacity(0.15),
+                blurRadius: 30,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(name, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                  Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.5), size: 16),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                status,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  height: 1.1,
+                  letterSpacing: -1.5,
+                  shadows: [
+                    Shadow(
+                      color: isGood ? const Color(0xFF60a5fa).withOpacity(0.3) : const Color(0xFFef4444).withOpacity(0.3),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 140,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF60a5fa).withOpacity(0.15),
+                        const Color(0xFF2dd4bf).withOpacity(0.08),
+                      ],
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Center(child: Icon(Icons.water_drop, size: 60, color: const Color(0xFF60a5fa).withOpacity(0.4))),
+                      Positioned(
+                        bottom: 12,
+                        left: 12,
+                        right: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildQuickStat(Icons.thermostat, "${temp.toStringAsFixed(1)}°C"),
+                              _buildQuickStat(Icons.science_outlined, "8.2 pH"),
+                              _buildQuickStat(Icons.water_outlined, "1.024"),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.access_time, size: 12, color: Colors.white.withOpacity(0.5)),
+                  const SizedBox(width: 6),
+                  Text("Updated 5 minutes ago", style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11)),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isGood ? const Color(0xFF34d399).withOpacity(0.2) : const Color(0xFFef4444).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isGood ? const Color(0xFF34d399).withOpacity(0.4) : const Color(0xFFef4444).withOpacity(0.4),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isGood ? Icons.check_circle : Icons.warning,
+                          size: 12,
+                          color: isGood ? const Color(0xFF34d399) : const Color(0xFFef4444),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isGood ? "Online" : "Alert",
+                          style: TextStyle(
+                            color: isGood ? const Color(0xFF34d399) : const Color(0xFFef4444),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickStat(IconData icon, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: const Color(0xFF60a5fa)),
+        const SizedBox(width: 6),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+}
