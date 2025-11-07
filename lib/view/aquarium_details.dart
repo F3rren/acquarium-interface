@@ -1,4 +1,8 @@
 import 'package:acquariumfe/components/thermometer.dart';
+import 'package:acquariumfe/components/ph.dart';
+import 'package:acquariumfe/components/salinity.dart';
+import 'package:acquariumfe/components/orp.dart';
+import 'package:acquariumfe/components/manual_parameters.dart';
 import 'package:flutter/material.dart';
 
 class AquariumDetails extends StatefulWidget {
@@ -12,6 +16,9 @@ class AquariumDetails extends StatefulWidget {
 
 class _AquariumDetailsState extends State<AquariumDetails> {
   double currentTemperature = 25.0;
+  double currentPh = 8.2;
+  double currentSalinity = 1.024;
+  double currentOrp = 350.0;
 
   @override
   Widget build(BuildContext context) {
@@ -44,25 +51,43 @@ class _AquariumDetailsState extends State<AquariumDetails> {
                 
                 const SizedBox(height: 20),
                 
-                const SizedBox(height: 40),
+                // pH Meter
+                PhMeter(
+                  currentPh: currentPh,
+                  targetPh: 8.2,
+                  lastUpdated: DateTime.now().subtract(const Duration(minutes: 3)),
+                  deviceName: 'pH Controller',
+                ),
                 
-                // Altre informazioni
-                // Container(
-                //   padding: const EdgeInsets.all(16),
-                //   decoration: BoxDecoration(
-                //     color: Colors.white.withOpacity(0.9),
-                //     borderRadius: BorderRadius.circular(12),
-                //   ),
-                //   child: const Column(
-                //     children: [
-                //       Text("pH: 7.2", style: TextStyle(fontSize: 18)),
-                //       SizedBox(height: 8),
-                //       Text("Salinità: 1.025", style: TextStyle(fontSize: 18)),
-                //       SizedBox(height: 8),
-                //       Text("Conducibilità: 53 mS/cm", style: TextStyle(fontSize: 18)),
-                //     ],
-                //   ),
-                // ),
+                const SizedBox(height: 20),
+                
+                // Salinità
+                SalinityMeter(
+                  currentSalinity: currentSalinity,
+                  targetSalinity: 1.024,
+                  lastUpdated: DateTime.now().subtract(const Duration(minutes: 10)),
+                  deviceName: 'Conduttivimetro',
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // ORP/Redox
+                OrpMeter(
+                  currentOrp: currentOrp,
+                  targetOrp: 350.0,
+                  lastUpdated: DateTime.now().subtract(const Duration(minutes: 7)),
+                  deviceName: 'Sonda ORP',
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Parametri manuali
+                const ManualParametersWidget(),
+                
+                const SizedBox(height: 20),
+                
+                // Controlli debug (da rimuovere in produzione)
+                _buildDebugControls(),
               ],
             ),
           ),
@@ -71,27 +96,66 @@ class _AquariumDetailsState extends State<AquariumDetails> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      children: [
-        Text(
-          "$label: ",
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
+  Widget _buildDebugControls() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Controlli Test (Debug)',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () => setState(() => currentTemperature = (currentTemperature - 0.5).clamp(15.0, 35.0)),
+                child: const Text('T -'),
+              ),
+              ElevatedButton(
+                onPressed: () => setState(() => currentTemperature = (currentTemperature + 0.5).clamp(15.0, 35.0)),
+                child: const Text('T +'),
+              ),
+              ElevatedButton(
+                onPressed: () => setState(() => currentPh = (currentPh - 0.1).clamp(7.0, 9.0)),
+                child: const Text('pH -'),
+              ),
+              ElevatedButton(
+                onPressed: () => setState(() => currentPh = (currentPh + 0.1).clamp(7.0, 9.0)),
+                child: const Text('pH +'),
+              ),
+              ElevatedButton(
+                onPressed: () => setState(() => currentSalinity = (currentSalinity - 0.001).clamp(1.015, 1.035)),
+                child: const Text('Sal -'),
+              ),
+              ElevatedButton(
+                onPressed: () => setState(() => currentSalinity = (currentSalinity + 0.001).clamp(1.015, 1.035)),
+                child: const Text('Sal +'),
+              ),
+              ElevatedButton(
+                onPressed: () => setState(() => currentOrp = (currentOrp - 10).clamp(150.0, 550.0)),
+                child: const Text('ORP -'),
+              ),
+              ElevatedButton(
+                onPressed: () => setState(() => currentOrp = (currentOrp + 10).clamp(150.0, 550.0)),
+                child: const Text('ORP +'),
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+
 
 }

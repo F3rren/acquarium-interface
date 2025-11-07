@@ -1,5 +1,5 @@
 import 'package:acquariumfe/routes/app_routes.dart';
-import 'package:acquariumfe/view/navbar.dart';
+import 'package:acquariumfe/view/navbar/navbar.dart';
 import 'package:acquariumfe/view/acquariums_view.dart';
 import 'package:flutter/material.dart';
 
