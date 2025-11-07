@@ -2,6 +2,7 @@
 import 'package:acquariumfe/views/parameters/parameters_page.dart';
 import 'package:acquariumfe/views/parameters/charts_page.dart';
 import 'package:acquariumfe/views/profile/profile_page.dart';
+import 'package:acquariumfe/views/notifications/notifications_page.dart';
 import 'package:flutter/material.dart';
 
 class AquariumDetails extends StatefulWidget {
@@ -69,7 +70,17 @@ class _AquariumDetailsState extends State<AquariumDetails> with SingleTickerProv
                 children: [
                   IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
                   const Text('La Mia Vasca', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
-                  IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.white), onPressed: () {}),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsPage(),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

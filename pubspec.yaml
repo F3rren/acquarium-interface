@@ -37,6 +37,15 @@ dependencies:
   
   # Charts library for data visualization
   fl_chart: ^0.69.0
+  
+  # Local notifications
+  flutter_local_notifications: ^18.0.1
+  
+  # Timezone support for scheduled notifications
+  timezone: ^0.9.4
+  
+  # Permission handler
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

@@ -1,0 +1,329 @@
+import 'package:acquariumfe/models/notification_settings.dart';
+import 'package:acquariumfe/services/notification_service.dart';
+
+class AlertManager {
+  static final AlertManager _instance = AlertManager._internal();
+  factory AlertManager() => _instance;
+  AlertManager._internal();
+
+  final NotificationService _notificationService = NotificationService();
+  NotificationSettings _settings = NotificationSettings();
+  
+  // Storico alert (da salvare poi su storage locale)
+  final List<AlertLog> _alertHistory = [];
+
+  /// Inizializza AlertManager
+  Future<void> initialize(NotificationSettings settings) async {
+    _settings = settings;
+    await _notificationService.initialize();
+  }
+
+  /// Aggiorna impostazioni
+  void updateSettings(NotificationSettings settings) {
+    _settings = settings;
+  }
+
+  /// Verifica parametro e invia notifica se necessario
+  Future<void> checkParameter({
+    required String name,
+    required double value,
+    required String unit,
+    required ParameterThresholds thresholds,
+  }) async {
+    if (!_settings.enabledAlerts || !thresholds.enabled) return;
+
+    if (thresholds.isOutOfRange(value)) {
+      // Invia notifica con indicazione se troppo basso o alto
+      await _notificationService.showParameterAlert(
+        parameterName: name,
+        currentValue: value,
+        minValue: thresholds.min,
+        maxValue: thresholds.max,
+        unit: unit,
+      );
+
+      // Determina messaggio specifico per lo storico
+      String alertMessage;
+      if (value < thresholds.min) {
+        alertMessage = 'Valore TROPPO BASSO: $value$unit (minimo: ${thresholds.min}$unit)';
+      } else {
+        alertMessage = 'Valore TROPPO ALTO: $value$unit (massimo: ${thresholds.max}$unit)';
+      }
+
+      // Registra nell'alert history
+      _addToHistory(AlertLog(
+        timestamp: DateTime.now(),
+        type: AlertType.parameter,
+        title: 'Alert: $name',
+        message: alertMessage,
+        severity: _calculateSeverity(value, thresholds),
+      ));
+    }
+  }
+
+  /// Calcola severità dell'alert
+  AlertSeverity _calculateSeverity(double value, ParameterThresholds thresholds) {
+    final range = thresholds.max - thresholds.min;
+    final deviation = value < thresholds.min 
+        ? (thresholds.min - value) 
+        : (value - thresholds.max);
+    
+    final percentDeviation = (deviation / range) * 100;
+
+    if (percentDeviation > 20) return AlertSeverity.critical;
+    if (percentDeviation > 10) return AlertSeverity.high;
+    if (percentDeviation > 5) return AlertSeverity.medium;
+    return AlertSeverity.low;
+  }
+
+  /// Verifica tutti i parametri dell'acquario
+  Future<void> checkAllParameters(Map<String, double> parameters) async {
+    if (parameters.containsKey('temperature')) {
+      await checkParameter(
+        name: 'Temperatura',
+        value: parameters['temperature']!,
+        unit: '°C',
+        thresholds: _settings.temperature,
+      );
+    }
+
+    if (parameters.containsKey('ph')) {
+      await checkParameter(
+        name: 'pH',
+        value: parameters['ph']!,
+        unit: '',
+        thresholds: _settings.ph,
+      );
+    }
+
+    if (parameters.containsKey('salinity')) {
+      await checkParameter(
+        name: 'Salinità',
+        value: parameters['salinity']!,
+        unit: '',
+        thresholds: _settings.salinity,
+      );
+    }
+
+    if (parameters.containsKey('orp')) {
+      await checkParameter(
+        name: 'ORP',
+        value: parameters['orp']!,
+        unit: ' mV',
+        thresholds: _settings.orp,
+      );
+    }
+
+    if (parameters.containsKey('calcium')) {
+      await checkParameter(
+        name: 'Calcio',
+        value: parameters['calcium']!,
+        unit: ' mg/L',
+        thresholds: _settings.calcium,
+      );
+    }
+
+    if (parameters.containsKey('magnesium')) {
+      await checkParameter(
+        name: 'Magnesio',
+        value: parameters['magnesium']!,
+        unit: ' mg/L',
+        thresholds: _settings.magnesium,
+      );
+    }
+
+    if (parameters.containsKey('kh')) {
+      await checkParameter(
+        name: 'KH',
+        value: parameters['kh']!,
+        unit: ' dKH',
+        thresholds: _settings.kh,
+      );
+    }
+
+    if (parameters.containsKey('nitrate')) {
+      await checkParameter(
+        name: 'Nitrati',
+        value: parameters['nitrate']!,
+        unit: ' ppm',
+        thresholds: _settings.nitrate,
+      );
+    }
+
+    if (parameters.containsKey('phosphate')) {
+      await checkParameter(
+        name: 'Fosfati',
+        value: parameters['phosphate']!,
+        unit: ' ppm',
+        thresholds: _settings.phosphate,
+      );
+    }
+  }
+
+  /// Schedula notifiche di manutenzione ricorrenti
+  Future<void> scheduleMaintenanceReminders() async {
+    if (!_settings.enabledMaintenance) return;
+
+    final reminders = _settings.maintenanceReminders;
+
+    // Cambio acqua
+    if (reminders.waterChange.enabled) {
+      final nextDate = DateTime.now().add(Duration(days: reminders.waterChange.frequencyDays));
+      await _notificationService.scheduleMaintenanceNotification(
+        id: 1000,
+        title: '💧 Promemoria: Cambio Acqua',
+        body: 'È tempo di cambiare l\'acqua dell\'acquario',
+        scheduledDate: DateTime(
+          nextDate.year,
+          nextDate.month,
+          nextDate.day,
+          reminders.waterChange.hour,
+          reminders.waterChange.minute,
+        ),
+        payload: 'maintenance_water_change',
+      );
+    }
+
+    // Pulizia filtro
+    if (reminders.filterCleaning.enabled) {
+      final nextDate = DateTime.now().add(Duration(days: reminders.filterCleaning.frequencyDays));
+      await _notificationService.scheduleMaintenanceNotification(
+        id: 1001,
+        title: '🔧 Promemoria: Pulizia Filtro',
+        body: 'Controlla e pulisci il filtro dell\'acquario',
+        scheduledDate: DateTime(
+          nextDate.year,
+          nextDate.month,
+          nextDate.day,
+          reminders.filterCleaning.hour,
+          reminders.filterCleaning.minute,
+        ),
+        payload: 'maintenance_filter',
+      );
+    }
+
+    // Test parametri
+    if (reminders.parameterTesting.enabled) {
+      final nextDate = DateTime.now().add(Duration(days: reminders.parameterTesting.frequencyDays));
+      await _notificationService.scheduleMaintenanceNotification(
+        id: 1002,
+        title: '🧪 Promemoria: Test Parametri',
+        body: 'Esegui i test dei parametri dell\'acqua',
+        scheduledDate: DateTime(
+          nextDate.year,
+          nextDate.month,
+          nextDate.day,
+          reminders.parameterTesting.hour,
+          reminders.parameterTesting.minute,
+        ),
+        payload: 'maintenance_testing',
+      );
+    }
+
+    // Manutenzione luci
+    if (reminders.lightMaintenance.enabled) {
+      final nextDate = DateTime.now().add(Duration(days: reminders.lightMaintenance.frequencyDays));
+      await _notificationService.scheduleMaintenanceNotification(
+        id: 1003,
+        title: '💡 Promemoria: Manutenzione Luci',
+        body: 'Controlla e pulisci le luci dell\'acquario',
+        scheduledDate: DateTime(
+          nextDate.year,
+          nextDate.month,
+          nextDate.day,
+          reminders.lightMaintenance.hour,
+          reminders.lightMaintenance.minute,
+        ),
+        payload: 'maintenance_lights',
+      );
+    }
+  }
+
+  /// Aggiunge alert allo storico
+  void _addToHistory(AlertLog log) {
+    _alertHistory.insert(0, log);
+    
+    // Mantieni solo gli ultimi 100 alert
+    if (_alertHistory.length > 100) {
+      _alertHistory.removeLast();
+    }
+  }
+
+  /// Ottieni storico alert
+  List<AlertLog> getAlertHistory({int? limit}) {
+    if (limit != null && limit < _alertHistory.length) {
+      return _alertHistory.sublist(0, limit);
+    }
+    return List.from(_alertHistory);
+  }
+
+  /// Pulisci storico alert
+  void clearAlertHistory() {
+    _alertHistory.clear();
+  }
+
+  /// Ottieni conteggio alert per severità
+  Map<AlertSeverity, int> getAlertCountBySeverity() {
+    final counts = <AlertSeverity, int>{
+      AlertSeverity.low: 0,
+      AlertSeverity.medium: 0,
+      AlertSeverity.high: 0,
+      AlertSeverity.critical: 0,
+    };
+
+    for (var alert in _alertHistory) {
+      counts[alert.severity] = (counts[alert.severity] ?? 0) + 1;
+    }
+
+    return counts;
+  }
+}
+
+class AlertLog {
+  final DateTime timestamp;
+  final AlertType type;
+  final String title;
+  final String message;
+  final AlertSeverity severity;
+
+  AlertLog({
+    required this.timestamp,
+    required this.type,
+    required this.title,
+    required this.message,
+    required this.severity,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'timestamp': timestamp.toIso8601String(),
+      'type': type.toString(),
+      'title': title,
+      'message': message,
+      'severity': severity.toString(),
+    };
+  }
+
+  factory AlertLog.fromJson(Map<String, dynamic> json) {
+    return AlertLog(
+      timestamp: DateTime.parse(json['timestamp']),
+      type: AlertType.values.firstWhere((e) => e.toString() == json['type']),
+      title: json['title'],
+      message: json['message'],
+      severity: AlertSeverity.values.firstWhere((e) => e.toString() == json['severity']),
+    );
+  }
+}
+
+enum AlertType {
+  parameter,
+  maintenance,
+  system,
+}
+
+enum AlertSeverity {
+  low,
+  medium,
+  high,
+  critical,
+}

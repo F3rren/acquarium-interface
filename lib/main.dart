@@ -1,9 +1,24 @@
 import 'package:acquariumfe/routes/app_routes.dart';
 import 'package:acquariumfe/views/home/acquariums_view.dart';
 import 'package:acquariumfe/views/shared/navbar/navbar.dart';
+import 'package:acquariumfe/services/notification_service.dart';
+import 'package:acquariumfe/services/alert_manager.dart';
+import 'package:acquariumfe/models/notification_settings.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inizializza il servizio notifiche
+  await NotificationService().initialize();
+  
+  // Inizializza l'alert manager con impostazioni di default
+  AlertManager().initialize(NotificationSettings(
+    enabledAlerts: true,
+    enabledMaintenance: true,
+    enabledDaily: false,
+  ));
+  
   runApp(const MyApp());
 }
 
